@@ -35,7 +35,7 @@ styles.css: score 68/100 (slop)
 
 Works on `.css` files and `.html` files (scans `<style>` blocks and inline
 `style="..."` attributes). Machine-readable output with `--json`; fail CI
-with `--fail-under 50`.
+with `--fail-over 50` (exit 1 when any file scores 50 or higher).
 
 ## Rules
 

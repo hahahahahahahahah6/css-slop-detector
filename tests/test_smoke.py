@@ -89,12 +89,12 @@ class TestSlopDetector(unittest.TestCase):
         self.assertIn("big-radius", rules)
         self.assertIn("purple-gradient", rules)
 
-    def test_fail_under_flag(self):
-        # --fail-under N fails when the score is UNDER N (matches plain-speak).
-        r = run_tool(self.sloppy, "--fail-under", "50")
-        self.assertEqual(r.returncode, 0, r.stderr)  # sloppy scores >= 50
-        r = run_tool(self.clean, "--fail-under", "50")
-        self.assertEqual(r.returncode, 1)  # clean scores < 50
+    def test_fail_over_flag(self):
+        # --fail-over N fails when any score is N or higher (higher = worse).
+        r = run_tool(self.sloppy, "--fail-over", "50")
+        self.assertEqual(r.returncode, 1, r.stderr)  # sloppy scores >= 50
+        r = run_tool(self.clean, "--fail-over", "50")
+        self.assertEqual(r.returncode, 0, r.stderr)  # clean scores < 50
 
     def test_near_black_ignores_blue_green(self):
         p = os.path.join(self.tmp.name, "colors.css")

@@ -277,8 +277,8 @@ def main(argv: list[str] | None = None) -> int:
         description="Score CSS/HTML for AI-generated design cliches.")
     ap.add_argument("paths", nargs="+", help="CSS or HTML files to scan")
     ap.add_argument("--json", action="store_true", help="emit JSON report")
-    ap.add_argument("--fail-under", type=int, default=None, metavar="N",
-                    help="exit 1 if any file scores below N")
+    ap.add_argument("--fail-over", type=int, default=None, metavar="N",
+                    help="exit 1 if any file scores N or higher")
     args = ap.parse_args(argv)
 
     reports = []
@@ -299,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("\n\n".join(fmt_human(r) for r in reports))
 
-    if args.fail_under is not None and any(r.score < args.fail_under for r in reports):
+    if args.fail_over is not None and any(r.score >= args.fail_over for r in reports):
         return 1
     return 0
 
