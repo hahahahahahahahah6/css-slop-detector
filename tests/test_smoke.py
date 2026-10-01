@@ -90,10 +90,50 @@ class TestSlopDetector(unittest.TestCase):
         self.assertIn("purple-gradient", rules)
 
     def test_fail_under_flag(self):
+        # --fail-under N fails when the score is UNDER N (matches plain-speak).
         r = run_tool(self.sloppy, "--fail-under", "50")
-        self.assertEqual(r.returncode, 1)
+        self.assertEqual(r.returncode, 0, r.stderr)  # sloppy scores >= 50
         r = run_tool(self.clean, "--fail-under", "50")
+        self.assertEqual(r.returncode, 1)  # clean scores < 50
+
+    def test_near_black_ignores_blue_green(self):
+        p = os.path.join(self.tmp.name, "colors.css")
+        with open(p, "w") as f:
+            f.write(".a{background:#0066cc}\n.b{background:#00ff00}\n"
+                    ".c{background:#0a0a0a}\n.d{background:#000}\n")
+        r = run_tool(p, "--json")
         self.assertEqual(r.returncode, 0, r.stderr)
+        import json
+        report = json.loads(r.stdout)[0]
+        black_lines = sorted(f["line"] for f in report["findings"]
+                             if f["rule"] == "pure-black")
+        self.assertEqual(black_lines, [3, 4], report["findings"])
+
+    def test_tailwind_shadow_not_neon(self):
+        p = os.path.join(self.tmp.name, "shadow.css")
+        with open(p, "w") as f:
+            f.write(".a{box-shadow: 0 25px 50px -12px rgba(0,0,0,.25)}\n"
+                    ".b{box-shadow: 0 0 60px rgba(139,92,246,.6)}\n")
+        r = run_tool(p, "--json")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        import json
+        report = json.loads(r.stdout)[0]
+        glow_lines = sorted(f["line"] for f in report["findings"]
+                            if f["rule"] == "glow-shadow")
+        self.assertEqual(glow_lines, [2], report["findings"])
+
+    def test_rule_line_numbers(self):
+        p = os.path.join(self.tmp.name, "lines.css")
+        with open(p, "w") as f:
+            f.write(".a {\n  background: #000;\n}\n"
+                    ".b {\n  background: #000;\n}\n")
+        r = run_tool(p, "--json")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        import json
+        report = json.loads(r.stdout)[0]
+        black_lines = sorted(f["line"] for f in report["findings"]
+                             if f["rule"] == "pure-black")
+        self.assertEqual(black_lines, [1, 4], report["findings"])  # was [1, 3]
 
     def test_missing_file_errors(self):
         r = run_tool(os.path.join(self.tmp.name, "nope.css"))

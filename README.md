@@ -12,8 +12,9 @@ Zero dependencies. Python standard library only.
 ## Install
 
 ```bash
-pip install css-slop-detector
-# or just run it — it's one file:
+git clone https://github.com/hahahahahahahahah6/css-slop-detector
+cd css-slop-detector
+# it's one file, stdlib only — just run it:
 python3 css_slop.py scan style.css
 ```
 
@@ -22,7 +23,7 @@ Requires Python 3.9+.
 ## Usage
 
 ```bash
-$ css-slop scan styles.css
+$ python3 css_slop.py scan styles.css
 styles.css: score 68/100 (slop)
   L12 [big-radius] oversized border-radius (32px) on '.card'
   L12 [glass] backdrop-filter blur on '.card' (glassmorphism)
